@@ -802,7 +802,7 @@ export function createParser(
             fieldType,
             requiredness: fieldRequired,
             defaultValue,
-            comments: getComments(),
+            comments: getComments(nameToken.loc.start.line),
             annotations,
             loc: location,
         }
@@ -1265,10 +1265,15 @@ export function createParser(
         )
     }
 
-    function getComments(): Array<Comment> {
+    function getComments(line?: number): Array<Comment> {
         const current: Array<Comment> = comments
-        comments = []
-        return current
+        if (line === undefined) {
+            comments = []
+            return current
+        }
+
+        comments = comments.filter((c) => c.loc.start.line > line)
+        return current.filter((c) => c.loc.start.line <= line)
     }
 
     function reportError(msg: string): Error {
